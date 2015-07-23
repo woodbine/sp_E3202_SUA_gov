@@ -66,8 +66,9 @@ block = soup.find('div', attrs = {'class':'navigation'}).find('ul').find('ul').f
 links = block.find_all('a')
 for link in links:
      link_csv = 'http://www.shropshire.gov.uk' +link['href']
-     html_csv = urllib2.urlopen(link_csv)
-     soup_csv = BeautifulSoup(html_csv)
+    # html_csv = urllib2.urlopen(link_csv)
+     html_csv = requests.get(link_csv)
+     soup_csv = BeautifulSoup(html_csv.text)
      block_csv = soup_csv.find('div', attrs = {'class':'content'}).find('ul', 'attachments')
      url_csvs = block_csv.find_all('a')
      for url_csv in url_csvs:
