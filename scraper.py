@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 
 #### IMPORTS 1.0
@@ -9,8 +8,7 @@ import scraperwiki
 import urllib2
 from datetime import datetime
 from bs4 import BeautifulSoup
-import requests
-from dateutil.parser import parse
+
 
 #### FUNCTIONS 1.0
 
@@ -45,7 +43,6 @@ def validateURL(url):
         while r.getcode() == 500 and count < 4:
             print ("Attempt {0} - Status code: {1}. Retrying.".format(count, r.status_code))
             count += 1
-           # r = requests.get(url, allow_redirects=True, timeout=90)
             r = urllib2.urlopen(url)
         sourceFilename = r.headers.get('Content-Disposition')
 
@@ -54,7 +51,7 @@ def validateURL(url):
         else:
             ext = os.path.splitext(url)[1]
         validURL = r.getcode() == 200
-        validFiletype = ext in ['.csv', '.xls', '.xlsx']
+        validFiletype = ext.lower() in ['.csv', '.xls', '.xlsx']
         return validURL, validFiletype
     except:
         print ("Error validating URL.")
@@ -94,8 +91,8 @@ data = []
 
 #### READ HTML 1.0
 
-html = requests.get (url)
-soup = BeautifulSoup(html.text, 'lxml')
+html = urllib2.urlopen(url)
+soup = BeautifulSoup(html, 'lxml')
 
 
 #### SCRAPE DATA
@@ -103,15 +100,14 @@ soup = BeautifulSoup(html.text, 'lxml')
 block = soup.find('div', attrs = {'class':'navigation'}).find('ul').find('ul').find('ul')
 links = block.find_all('a')
 for link in links:
-     link_csv = 'http://www.shropshire.gov.uk' +link['href']
-
-     html_csv = requests.get(link_csv)
-     soup_csv = BeautifulSoup(html_csv.text, 'lxml')
+     link_csv = 'http://www.shropshire.gov.uk' +link['href'].encode('utf-8')
+     html_csv = urllib2.urlopen(link_csv)
+     soup_csv = BeautifulSoup(html_csv, 'lxml')
      block_csv = soup_csv.find('div', attrs = {'class':'content'}).find('ul', 'attachments')
      url_csvs = block_csv.find_all('a')
      for url_csv in url_csvs:
          if '.csv' in url_csv['href']:
-             url = 'http://www.shropshire.gov.uk' + url_csv['href']
+             url = 'http://www.shropshire.gov.uk' + url_csv['href'].encode('utf-8')
              csvfiles = url_csv.text
              csvYr = csvfiles.split('Payments ')[-1].split(' ')[0]
              csvMth = csvfiles.split('Payments ')[-1].split(' ')[1]
