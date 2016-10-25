@@ -116,11 +116,22 @@ for link in links:
                  csvYr = csvfiles.split('Payments ')[-1].split(' ')[1]
                  csvMth = csvfiles.split('Payments ')[-1].split(' ')[0][:3]
                  csvMth = convert_mth_strings(csvMth.upper())
+             if 'V1' in csvfiles and '2015' in csvfiles:
+                 csvMth = url_csv.text.split('Payments ')[-1].replace('V1', '').replace('(CSV)', '').strip().split(' ')[-1][:3]
+                 csvMth = convert_mth_strings(csvMth.upper())
+             if 'Payments 2015 16 January V1' in csvfiles:
+                 csvYr = '2016'
+                 csvMth = url_csv.text.split('Payments ')[-1].replace('V1', '').replace('(CSV)', '').strip().split(' ')[-1][:3]
+             if 'Payments 2015 16 March V1 (CSV)' in csvfiles:
+                 csvYr = '2016'
+                 csvMth = 'Feb'
              if len(csvMth)<2:
                  csvMth = '0'+csvMth
+             if 'Payments 2016 March V1' in csvfiles:
+                 csvYr = '2016'
+                 csvMth = 'Mar'
              if '2016' in csvMth:
                  csvMth = csvfiles.split('Payments ')[-1].split(' ')[-1].strip()[:3]
-
              csvMth = convert_mth_strings(csvMth.upper())
              data.append([csvYr, csvMth, url])
 
@@ -146,4 +157,3 @@ if errors > 0:
 
 
 #### EOF
-
