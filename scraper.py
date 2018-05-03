@@ -85,7 +85,7 @@ def convert_mth_strings ( mth_string ):
 #### VARIABLES 1.0
 
 entity_id = "E3202_SUA_gov"
-url = "http://www.shropshire.gov.uk/open-data/supplier-payments-over-%C2%A3500/"
+url = "https://www.shropshire.gov.uk/open-data/datasets/supplier-payments-over-500/"
 errors = 0
 data = []
 
@@ -98,40 +98,24 @@ soup = BeautifulSoup(html, 'lxml')
 #### SCRAPE DATA
 import requests
 
-block = soup.find('div', attrs = {'class':'navigation'}).find('ul').find('ul').find('ul')
+block = soup.find('section', 'sectionhotlinks')
 links = block.find_all('a')
 for link in links:
      link_csv = 'http://www.shropshire.gov.uk' +link['href'].encode('utf-8')
      html_csv = requests.get(link_csv)
      soup_csv = BeautifulSoup(html_csv.text, 'lxml')
-     block_csv = soup_csv.find('div', attrs = {'class':'content'}).find('ul', 'attachments')
+     block_csv = soup_csv.find('div', 'documentslist')
      url_csvs = block_csv.find_all('a')
      for url_csv in url_csvs:
          if '.csv' in url_csv['href']:
              url = 'http://www.shropshire.gov.uk' + url_csv['href'].encode('utf-8')
              csvfiles = url_csv.text
-             csvYr = csvfiles.split('Payments ')[-1].split(' ')[0]
-             csvMth = csvfiles.split('Payments ')[-1].split(' ')[1]
-             if '20' not in csvYr:
-                 csvYr = csvfiles.split('Payments ')[-1].split(' ')[1]
-                 csvMth = csvfiles.split('Payments ')[-1].split(' ')[0][:3]
-                 csvMth = convert_mth_strings(csvMth.upper())
-             if 'V1' in csvfiles and '2015' in csvfiles:
-                 csvMth = url_csv.text.split('Payments ')[-1].replace('V1', '').replace('(CSV)', '').strip().split(' ')[-1][:3]
-                 csvMth = convert_mth_strings(csvMth.upper())
-             if 'Payments 2015 16 January V1' in csvfiles:
-                 csvYr = '2016'
-                 csvMth = url_csv.text.split('Payments ')[-1].replace('V1', '').replace('(CSV)', '').strip().split(' ')[-1][:3]
-             if 'Payments 2015 16 March V1 (CSV)' in csvfiles:
-                 csvYr = '2016'
-                 csvMth = 'Feb'
-             if len(csvMth)<2:
-                 csvMth = '0'+csvMth
-             if 'Payments 2016 March V1' in csvfiles:
-                 csvYr = '2016'
-                 csvMth = 'Mar'
-             if '2016' in csvMth:
-                 csvMth = csvfiles.split('Payments ')[-1].split(' ')[-1].strip()[:3]
+             try:
+                 csvMth = csvfiles.split('-')[2].replace('.csv', '').strip()[:3]
+                 csvYr = csvfiles.split('-')[1].strip()
+             except:
+                  csvMth = csvfiles.split()[1].strip()[:3]
+                  csvYr = csvfiles.split()[2].replace('.csv', '').strip()
              csvMth = convert_mth_strings(csvMth.upper())
              data.append([csvYr, csvMth, url])
 
